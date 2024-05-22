@@ -1,0 +1,49 @@
+//
+// Get scripts location
+global string $gShelfTopLevel;
+string $currentShelf = `tabLayout -query -selectTab $gShelfTopLevel`;
+setParent $currentShelf;
+
+//
+// Create naming and command
+string $scriptLocation = `scriptLocation`;
+string $scriptName = "REF";
+string $command = "import sys\n" +
+                 "import os\n" +
+                 "REFPath = '" + $scriptLocation + "scripts'\n" +
+                 "systemPath = sys.path\n" +
+                 "if REFPath in systemPath:\n" +
+                 "    systemPath.remove(REFPath)\n" +
+                 "systemPath.insert(0, REFPath)\n" +
+                 "import reference_editor\n" +
+                 "reference_editor.REF_UI()";
+
+//
+// Install button to current shelf
+string $icon = $scriptLocation + "icons/REF_icon.png";
+shelfButton
+    -command $command
+    -annotation $scriptName
+    -label $scriptName
+    -image $icon
+    -style "iconOnly"
+    -sourceType "python";
+
+
+// Print naming
+print ("// "+$scriptName+" Add the tool to the shelf complete.\n");
+
+//
+// Helper functions for locating script's location
+global proc scriptLocator (){}
+global proc string scriptLocation ()
+{
+    string $whatIs=`whatIs scriptLocator`;
+    string $fullPath=`substring $whatIs 25 999`;
+    string $buffer[];
+    int $numTok=`tokenize $fullPath "/" $buffer`;
+    int $numLetters=size($fullPath);
+    int $numLettersLastFolder=size($buffer[$numTok-1]);
+    string $scriptLocation=`substring $fullPath 1 ($numLetters-$numLettersLastFolder)`;
+    return $scriptLocation;
+}
